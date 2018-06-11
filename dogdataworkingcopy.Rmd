@@ -1,0 +1,55 @@
+---
+title: "Dogdata"
+author: "emily cassell"
+date: "6/3/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(foreign)
+library(tidyverse)
+library(tidyr)
+library(ggplot2)
+library(RSQLite)
+library(DBI)
+
+
+
+````
+
+## Doggies
+
+```{r}
+dogsdata<-read.csv("NYC_Dog_LIcensing_Dataset.csv", header=TRUE, sep=",")
+
+summary(dogsdata)
+
+```
+
+```{r}
+
+sort(table(dogsdata$BreedName),decreasing=TRUE)[1:10]
+```
+```{r}
+morningsideheights<-dogsdata[ which(dogsdata$ZipCode==10025), ]
+sort(table(morningsideheights$BreedName),decreasing=TRUE)[1:10]
+
+```
+
+```{r}
+zipcodedata<-read.dbf("ZIP_CODE_040114/ZIP_CODE_040114.dbf", as.is=FALSE)
+con<-dbConnect(RSQLite::SQLite(), "nyc_gdb_jan2018a/nyc_gdb_jan2018.sqlite" )
+sqlzip <- dbSendQuery(con, "
+
+SELECT * FROM a_zctas LIMIT 5
+                      
+                      ")
+
+
+
+````
