@@ -1,0 +1,95 @@
+---
+title: "Dogdata"
+author: "emily cassell"
+date: "6/3/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(foreign)
+library(tidyverse)
+library(tidyr)
+library(ggplot2)
+library(RSQLite)
+library(DBI)
+library(dplyr)
+
+
+
+````
+
+## Doggies
+
+```{r}
+dogsdata<-read.csv("NYC_Dog_LIcensing_Dataset.csv", header=TRUE, sep=",")
+
+summary(dogsdata)
+
+```
+
+```{r}
+
+sort(table(dogsdata$BreedName),decreasing=TRUE)[1:10]
+```
+```{r}
+morningsideheights<-dogsdata[ which(dogsdata$ZipCode==10025), ]
+sort(table(morningsideheights$BreedName),decreasing=TRUE)[1:10]
+
+```
+
+```{r}
+zipcodedata<-read.dbf("ZIP_CODE_040114/ZIP_CODE_040114.dbf", as.is=FALSE)
+con<-dbConnect(RSQLite::SQLite(), "nyc_gdb_jan2018a/nyc_gdb_jan2018.sqlite" )
+sqlzip <- dbSendQuery(con, "
+
+SELECT * FROM a_zctas LIMIT 5
+                      
+                      ")
+
+
+
+````
+
+
+```{r}
+
+#install.packages("ggmap")
+library(ggmap)
+
+
+```
+
+```{r}
+#zipcodes<-read.csv("zipcodegithub.txt", header=TRUE, sep=",")
+#nevermind that
+
+#install.packages("zipcode")
+library(zipcode)
+zipcode1<-data(zipcode)
+colnames(zipcode)[1]<-"ZipCode"
+zipcode$ZipCode<-as.numeric(zipcode$ZipCode)
+
+
+```
+
+
+```{r}
+dogszipdata<-left_join(dogsdata, zipcode, by="ZipCode")
+
+
+
+```
+
+
+```{r}
+manhattan1<-get_map(location ="Lower Manhattan, New York", maptype="roadmap" ,source="google", zoom=13)
+
+
+h<-ggmap(manhattan1) + geom_point(data=dogszipdata, mapping=aes(x=longitude, y=latitude), alpha=.75)+ geom_jitter()
+h
+```
